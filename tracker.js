@@ -66,6 +66,7 @@ function department() {
             if (err) throw err;
             console.log(`You've added the following department: ${data.dName} \n ------------------------------- \n`);
             console.log("  ID  |   Name  ")
+            // does not work after here
             console.log(res);
             for (let i=0; i < res.length; i++) {
                 console.log(`${res[i].id} | ${res[i].name}`);
