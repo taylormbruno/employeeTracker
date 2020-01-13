@@ -1,6 +1,7 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 
+let depts = [];
 let roles = [];
 
 const connection = mysql.createConnection({
@@ -19,8 +20,11 @@ connection.connect(function(err) {
     console.log("Connected as id " + connection.threadId);
 
     runStart();
+
+    // retrDepts();
 });
 
+// starts application. change to which category they are working on leading to more prompts specific to that category
 function runStart() {
     inquirer.prompt(
         {
@@ -52,6 +56,7 @@ function runStart() {
             break;
             
         case "Add role":
+            retrDepts();
             role();
             break;
 
@@ -71,6 +76,19 @@ function runStart() {
     });
 }
 
+// used to retrieve departments to create inquirer lists for roles
+function retrDepts() {
+    connection.query("SELECT * FROM departments", function(err, res) {
+        if (err) throw err;
+        for (let i=0; i<res.length; i++) {
+            depts.push(res[i].dName);
+            console.log(depts);
+        }
+    });
+    console.log(depts);
+}
+
+// used to retrieve roles to create inquirer lists for employee
 function retrRoles() {
     connection.query("SELECT * FROM roles", function(err, res) {
         if (err) throw err;
@@ -80,6 +98,7 @@ function retrRoles() {
     });
 }
 
+// used to view a table from the console
 function view(view) {
     switch (view) {
         case "departments":
@@ -122,6 +141,7 @@ function view(view) {
     
 }
 
+// create department
 function department() {
     inquirer.prompt(
         {
@@ -139,6 +159,7 @@ function department() {
     });
 }
 
+// create role
 function role() {
     inquirer.prompt([
         {
@@ -151,22 +172,41 @@ function role() {
             type: "input",
             message:"What would you like the salary for this role set to?"
         },
+        {
+            name: "deptID",
+            type: "list",
+            message:"What is the department for this role?",
+            choices: depts
+        }
     ]).then(function(data) {
-        // let query = 'INSERT INTO departments VALUES ?';
-        connection.query("INSERT INTO roles(title, salary, department_id) VALUES ?", 
-        { 
-            title: data.title,
-            salary: data.salary,
-            department_id: data.deptId
-
-        }, function(err, res) {
-            if (err) throw err;
-            console.log(`\nYou've added the following role: ${data.title} \n ------------------------------- \n`);
-        });
-        runStart();
+        let dId  = data.deptID;
+        let dSal = data.salary;
+        let dTi = data.title;
+        connection.query(
+            "SELECT * FROM departments WHERE ?",
+            {
+                dName: dId
+            }, 
+            function(err, res) {
+                if (err) throw err;
+                deptOut = res[0].id;
+                console.log(dSal);
+                connection.query("INSERT INTO roles SET ?", 
+                { 
+                    title: dTi,
+                    salary: dSal,
+                    department_id: deptOut
+                }, function(err, res) {
+                    if (err) throw err;
+                    console.log(`\nYou've added the following role: ${data.title} \n ------------------------------- \n`);
+                });
+                runStart();
+            }
+        );
     });
 }
 
+// create employee
 function employee() {
    inquirer.prompt([
         {
@@ -186,17 +226,13 @@ function employee() {
             choices: roles
         }
    ]).then(function(answers) {
-        let roleID;
-        console.log(roleID);
-        let r = connection.query(
+        connection.query(
             "SELECT * FROM roles WHERE ?", 
             {
                 title: answers.role,
             },
             function(err, res) {
                 if (err) throw err;
-                // console.log(`ROLE\n-----------------\n${JSON.stringify(res[0].id)}\n-----------------`);
-                // console.log(roleStr);
                 roleOut = res[0].id;
                 connection.query(
                     "INSERT INTO employees SET ?", 
@@ -212,7 +248,5 @@ function employee() {
                 runStart();
             }
         );
-        // roleID = r;
-        // console.log(roleID);
     })
 }
