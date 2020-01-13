@@ -72,23 +72,42 @@ function view(view) {
     switch (view) {
         case "departments":
             query = "SELECT * FROM departments";
+            connection.query(query, function(err,res) {
+                if (err) throw err;
+        
+                console.log("  ID  |  Name  \n---------------");
+                for(let i=0; i<res.length; i++) {
+                    console.log(`${res[i].id}  |  ${res[i].dName}`);
+                }
+                runStart();
+            });
             break;
         case "roles":
             query = "SELECT * FROM roles";
+            connection.query(query, function(err,res) {
+                if (err) throw err;
+        
+                console.log("  ID  |  Title  |  Salary  |  Department ID  \n---------------");
+                for(let i=0; i<res.length; i++) {
+                    console.log(`${res[i].id}  |  ${res[i].title}  |  $${res[i].salary}  |  ${res[i].department_id}`);
+                }
+                runStart();
+            });
             break;
         case "employees":
-            query = "SELECT * FROM roles";
+            query = "SELECT * FROM employees";
+            connection.query(query, function(err,res) {
+                if (err) throw err;
+        
+                console.log("  ID  |  Name  |  Role ID  |  Manager ID  \n---------------");
+                for(let i=0; i<res.length; i++) {
+                    console.log(`${res[i].id}  |  ${res[i].last_name}, ${res[i].first_name}  |  ${res[i].role_id}  |  ${res[i].manager_id}`);
+                }
+                runStart();
+            });
             break;
     }
-    connection.query(query, function(err,res) {
-        if (err) throw err;
-
-        console.log("  ID  |  Name  \n---------------");
-        for(let i=0; i<res.length; i++) {
-            console.log(`${res[i].id}  |  ${res[i].dName}`);
-        }
-        runStart();
-    });
+    
 }
 
 function department() {
