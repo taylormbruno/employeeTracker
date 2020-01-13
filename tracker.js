@@ -3,10 +3,13 @@ const inquirer = require("inquirer");
 
 const connection = mysql.createConnection({
     host: "localhost",
+    // your port
     port: 3306,
+    // your username
     user: "root",
-    password:"Rbkoho46",
-    database:"employees_db"
+    // your password
+    password: "Rbkoho46",
+    database: "employees_db"
 });
 
 connection.connect(function(err) {
@@ -23,22 +26,37 @@ function runStart() {
             type: "list",
             message: "What would you like to do?",
             choices: [
-                "Add department", 
+                "View departments",
+                "Add department",
+                "View roles", 
                 "Add role", 
+                "View employees",
                 "Add employee", 
                 "Exit"
             ]
         }
     ).then(function(data) {
         switch (data.action) {
+        case "View departments":
+            view("departments");
+            break;
+
         case "Add department": 
             department();
             break;
 
+        case "View roles":
+            view("roles");
+            break;
+            
         case "Add role":
             role();
             break;
 
+        case "View employees":
+            view("employees");
+            break;
+                
         case "Add employee":
             employee();
             break;
@@ -50,27 +68,42 @@ function runStart() {
     });
 }
 
+function view(view) {
+    switch (view) {
+        case "departments":
+            query = "SELECT * FROM departments";
+            break;
+        case "roles":
+            query = "SELECT * FROM roles";
+            break;
+        case "employees":
+            query = "SELECT * FROM roles";
+            break;
+    }
+    connection.query(query, function(err,res) {
+        if (err) throw err;
+
+        console.log("  ID  |  Name  \n---------------");
+        for(let i=0; i<res.length; i++) {
+            console.log(`${res[i].id}  |  ${res[i].dName}`);
+        }
+        runStart();
+    });
+}
+
 function department() {
     inquirer.prompt(
         {
-            name: "dName",
+            name: "name",
             type: "input",
             message:"What would you like to name this department?"
         }
     ).then(function(data) {
-        let query = `INSERT INTO departments (name) VALUES (?)`;
-        connection.query(query, [
-            data.dName
-        ], 
-        function(err, res) {
+        // let query = 'INSERT INTO departments VALUES ?';
+        connection.query("INSERT INTO departments SET ?", { dName: data.name }, function(err, res) {
             if (err) throw err;
-            console.log(`You've added the following department: ${data.dName} \n ------------------------------- \n`);
-            console.log("  ID  |   Name  ")
-            // does not work after here
-            console.log(res);
-            for (let i=0; i < res.length; i++) {
-                console.log(`${res[i].id} | ${res[i].name}`);
-            }
+            console.log(`\nYou've added the following department: ${data.name} \n ------------------------------- \n`);
         });
+        runStart();
     });
 }
