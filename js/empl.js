@@ -14,9 +14,9 @@ function retrRoles() {
         for (let i=0; i<res.length; i++) {
             roles.push(res[i].title);
         }
+        console.log(roles);
     });
 }
-
 
 // create employee
 function employee() {
@@ -35,7 +35,12 @@ function employee() {
              name: "role",
              type: "list",
              message:"What is the role of this employee?",
-             choices: roles
+             choices: ["Accounting"]
+         },
+         {
+             name: "manager",
+             type: "confirm",
+             message: "Is this employee a manager?"
          }
     ]).then(function(answers) {
          connection.query(
