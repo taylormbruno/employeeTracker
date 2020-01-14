@@ -1,20 +1,32 @@
-let runStart = require("../tracker");
 
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 
-const connection = require("../tracker");
+const tracker = require("../tracker");
 
 let roles = [];
+let mgrs = ["none"];
 
 // used to retrieve roles to create inquirer lists for employee
 function retrRoles() {
-    connection.query("SELECT * FROM roles", function(err, res) {
+    tracker.connection.query("SELECT * FROM roles", function(err, res) {
         if (err) throw err;
         for (let i=0; i<res.length; i++) {
             roles.push(res[i].title);
         }
-        console.log(roles);
+        // console.log(roles);
+    });
+}
+
+function retrMan() {
+    tracker.connection.query("SELECT * FROM employees WHERE manager_id!=null", function(err, res) {
+        if(err) throw err;
+        for(let i=0; i<res.length; i++) {
+            let first = res[i].first_name;
+            let last = res[i].last_name;
+            let mName = first.concat(' ', last); 
+            mgrs.push(mName);
+        }
     });
 }
 
@@ -35,15 +47,16 @@ function employee() {
              name: "role",
              type: "list",
              message:"What is the role of this employee?",
-             choices: ["Accounting"]
+             choices: roles
          },
          {
              name: "manager",
-             type: "confirm",
-             message: "Is this employee a manager?"
+             type: "list",
+             message: "Whos is this empoyees manager?",
+             choices: mgrs
          }
     ]).then(function(answers) {
-         connection.query(
+         tracker.connection.query(
              "SELECT * FROM roles WHERE ?", 
              {
                  title: answers.role,
@@ -51,7 +64,7 @@ function employee() {
          function(err, res) {
              if (err) throw err;
              roleOut = res[0].id;
-             connection.query(
+             tracker.connection.query(
                  "INSERT INTO employees SET ?", 
                  {
                      first_name: answers.fName, 
@@ -63,10 +76,11 @@ function employee() {
                  if (err) throw err;
                  console.log(`\nYou've added the following employee: ${answers.fName} ${answers.lName} \n ------------------------------- \n`);
              });
-             runStart();
+             tracker.runStart();
          });
      });
  }
 
-module.exports = retrRoles;
-module.exports = employee;
+exports.retrMan = retrMan;
+exports.retrRoles = retrRoles;
+exports.employee = employee;

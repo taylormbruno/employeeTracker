@@ -1,11 +1,9 @@
-// possibly use db wrapper but have not seen solid example
-
-const runStart = require("../tracker");
+// possibly use db wrapper for connection but have not seen solid example
 
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 
-const connection = require("../tracker");
+const tracker = require("../tracker");
 
 // create department
 function department() {
@@ -17,14 +15,14 @@ function department() {
         }
     ).then(function(data) {
         // let query = 'INSERT INTO departments VALUES ?';
-        connection.query("INSERT INTO departments SET ?", 
+        tracker.connection.query("INSERT INTO departments SET ?", 
             { dName: data.name }, 
         function(err, res) {
             if (err) throw err;
             console.log(`\nYou've added the following department: ${data.name} \n ------------------------------- \n`);
         });
-        runStart();
+        tracker.runStart();
     });
 }
 
-module.exports = department;
+exports.department = department;

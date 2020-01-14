@@ -3,13 +3,13 @@ const runStart = require("../tracker");
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 
-const connection = require("../tracker");
+const tracker = require("../tracker");
 
 let depts = [];
 
 // used to retrieve departments to create inquirer lists for roles
 function retrDepts() {
-    connection.query("SELECT * FROM departments", function(err, res) {
+    tracker.connection.query("SELECT * FROM departments", function(err, res) {
         if (err) throw err;
         for (let i=0; i<res.length; i++) {
             depts.push(res[i].dName);
@@ -40,7 +40,7 @@ function role() {
         let dId  = data.deptID;
         let dSal = data.salary;
         let dTi = data.title;
-        connection.query(
+        tracker.connection.query(
             "SELECT * FROM departments WHERE ?",
             {
                 dName: dId
@@ -48,7 +48,7 @@ function role() {
         function(err, res) {
             if (err) throw err;
             deptOut = res[0].id;
-            connection.query("INSERT INTO roles SET ?", 
+            tracker.connection.query("INSERT INTO roles SET ?", 
                 { 
                     title: dTi,
                     salary: dSal,
@@ -58,10 +58,10 @@ function role() {
                 if (err) throw err;
                 console.log(`\nYou've added the following role: ${data.title} \n ------------------------------- \n`);
             });
-            runStart();
+            tracker.runStart();
         });
     });
 }
 
-module.exports = retrDepts;
-module.exports = role;
+exports.retrDepts = retrDepts;
+exports.role = role;
