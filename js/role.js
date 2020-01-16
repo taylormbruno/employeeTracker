@@ -12,7 +12,7 @@ function retrDepts() {
     tracker.connection.query("SELECT * FROM departments", function(err, res) {
         if (err) throw err;
         for (let i=0; i<res.length; i++) {
-            depts.push(res[i].dName);
+            depts.push(res[i].dept_name);
         }
     });
 }
@@ -43,7 +43,7 @@ function role() {
         tracker.connection.query(
             "SELECT * FROM departments WHERE ?",
             {
-                dName: dId
+                dept_name: dId
             }, 
         function(err, res) {
             if (err) throw err;

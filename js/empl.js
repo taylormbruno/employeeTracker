@@ -19,13 +19,15 @@ function retrRoles() {
 }
 
 function retrMan() {
-    tracker.connection.query("SELECT * FROM employees WHERE manager_id!=null", function(err, res) {
+    tracker.connection.query("SELECT * FROM employees WHERE manager_id IS NULL", function(err, res) {
+        // console.log(res);
         if(err) throw err;
         for(let i=0; i<res.length; i++) {
             let first = res[i].first_name;
             let last = res[i].last_name;
             let mName = first.concat(' ', last); 
             mgrs.push(mName);
+            // console.log(mName);
         }
     });
 }
@@ -56,31 +58,56 @@ function employee() {
              choices: mgrs
          }
     ]).then(function(answers) {
+        let mgrN = answers.manager.split(" ");
          tracker.connection.query(
              "SELECT * FROM roles WHERE ?", 
              {
                  title: answers.role,
              },
          function(err, res) {
-             if (err) throw err;
-             roleOut = res[0].id;
-             tracker.connection.query(
-                 "INSERT INTO employees SET ?", 
-                 {
-                     first_name: answers.fName, 
-                     last_name: answers.lName, 
-                     role_id: roleOut,
-                     manager_id: null
-                 }, 
-             function(err, res) {
-                 if (err) throw err;
-                 console.log(`\nYou've added the following employee: ${answers.fName} ${answers.lName} \n ------------------------------- \n`);
-             });
-             tracker.runStart();
-         });
-     });
- }
+            if (err) throw err;
+            let roleOut = res[0].id;
 
+            if (mgrN == "none") {
+                mgrID = null;
+            }
+            else {
+                let fN = mgrN[0];
+                let lN = mgrN[1];
+                console.log("\n 1 NAME MGR: " + fN + " " + lN);
+                tracker.connection.query(
+                "SELECT * FROM employees WHERE ? AND ?", 
+                [{first_name: fN}, {last_name: lN}], 
+                function(err, res) {
+                    if (err) throw err;
+                    console.log("\n 2 result id: " + res[0].id);
+                    let im = res[0].id;
+                    return addE(answers, im, roleOut);
+                });
+            }
+        });
+    });
+}
+
+function addE(answers, im, roleOut) {
+    console.log("\n 3 answers: " + answers.fName);
+    console.log("\n 4 im " + im);
+    console.log("\n 5 roleOut " + roleOut);
+    tracker.connection.query(
+    "INSERT INTO employees SET ?", 
+        {
+            first_name: answers.fName, 
+            last_name: answers.lName, 
+            role_id: roleOut,
+            manager_id: im
+        }, 
+    function(err, res) {
+        if (err) throw err;
+        console.log(`\n 5 You've added the following employee: ${answers.fName} ${answers.lName} \n ------------------------------- \n`);
+    });
+    tracker.runStart();
+}
 exports.retrMan = retrMan;
 exports.retrRoles = retrRoles;
 exports.employee = employee;
+

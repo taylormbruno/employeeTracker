@@ -16,7 +16,7 @@ function department() {
     ).then(function(data) {
         // let query = 'INSERT INTO departments VALUES ?';
         tracker.connection.query("INSERT INTO departments SET ?", 
-            { dName: data.name }, 
+            { dept_name: data.name }, 
         function(err, res) {
             if (err) throw err;
             console.log(`\nYou've added the following department: ${data.name} \n ------------------------------- \n`);
