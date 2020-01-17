@@ -59,18 +59,18 @@ function employee() {
          }
     ]).then(function(answers) {
         let mgrN = answers.manager.split(" ");
-         tracker.connection.query(
-             "SELECT * FROM roles WHERE ?", 
-             {
-                 title: answers.role,
-             },
-         function(err, res) {
+        tracker.connection.query(
+        "SELECT * FROM roles WHERE ?", 
+            {
+                title: answers.role,
+            },
+        function(err, res) {
             if (err) throw err;
-            console.log("1 " + res);
             let roleOut = res[0].id;
 
             if (mgrN == "none") {
-                mgrID = null;
+                im = null;
+                return addE(answers, im, roleOut)
             }
             else {
                 let fN = mgrN[0];
