@@ -66,6 +66,7 @@ function employee() {
              },
          function(err, res) {
             if (err) throw err;
+            console.log("1 " + res);
             let roleOut = res[0].id;
 
             if (mgrN == "none") {
@@ -78,6 +79,7 @@ function employee() {
                 "SELECT * FROM employees WHERE ? AND ?", 
                 [{first_name: fN}, {last_name: lN}], 
                 function(err, res) {
+                    console.log("2 " + res);
                     if (err) throw err;
                     let im = res[0].id;
                     return addE(answers, im, roleOut);
@@ -98,6 +100,8 @@ function addE(answers, im, roleOut) {
         }, 
     function(err, res) {
         if (err) throw err;
+        console.log("3 "+res);
+
         console.log(`\n You've added the following employee: ${answers.fName} ${answers.lName} \n ------------------------------- \n`);
     });
     tracker.runStart();
@@ -120,7 +124,7 @@ function updateEmpl() {
         updE2(empNames, empCol);
     });
 }
-
+let eName;
 function updE2(empNames, empCol) {
     inquirer.prompt([
         {
@@ -136,7 +140,7 @@ function updE2(empNames, empCol) {
             choices: empCol
         }
     ]).then(function(data) {
-        let eName = data.who;
+        eName = data.who;
         let up = data.upWhat;
         switch (data.upWhat) {
             case 'first_name':
@@ -170,11 +174,11 @@ function updE2(empNames, empCol) {
                 }
                 break;
         }
-        up3(eName, up, upPrompt);
+        up3(up, upPrompt);
     });
 }
 
-function up3(eName, up, upPrompt) {
+function up3(up, upPrompt) {
     inquirer.prompt(upPrompt).then(function(data) {
         let upD;
         switch (up) {
@@ -195,7 +199,6 @@ function up3(eName, up, upPrompt) {
                 break;
             case 'manager_id':
                 let mN = data.update.split(" ");
-                console.log(mN);
                 tracker.connection.query('SELECT id FROM employees WHERE ? AND ?',[
                     {
                         first_name: mN[0]
@@ -206,7 +209,7 @@ function up3(eName, up, upPrompt) {
                 ],
                 function (err,res) {
                     upD = res[0].id;
-                    up4(upD, up, data, eName)
+                    up4(upD, up)
                 });
                 break;
         }
@@ -214,16 +217,14 @@ function up3(eName, up, upPrompt) {
     });
 }
 
-function up4(upD, up, data, eName) {
-    console.log(upD);
+function up4(upD, up) {
     let p1 = {};
     p1[up] = upD;
     let nm = eName.split(" ");
-    console.log(p1);
     tracker.connection.query(
     "UPDATE employees SET ? WHERE (? AND ?)",[p1, {first_name: nm[0]}, {last_name: nm[1]}],
     function(err, res) {
-        console.log(res);
+        console.log(`You have now updated ${eName}'s *${up}* to ${upD}`);
     }
     );
 }
