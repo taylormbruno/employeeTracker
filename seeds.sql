@@ -25,4 +25,10 @@ ON e.role_id = r.id;
 SELECT e.first_name, e.last_name, r.title, r.salary, d.dept_name
 FROM ((employees e
 INNER JOIN roles r ON e.role_id = r.id)
-INNER JOIN departments d ON r.department_id = d.id);
+INNER JOIN departments d ON r.department_id = d.id)
+WHERE title = "Sales Lead";
+
+
+SELECT * FROM employees WHERE manager_id IS NOT NULL;
+
+SELECT id FROM employees WHERE first_name = "Tom" AND last_name = "Cruise";

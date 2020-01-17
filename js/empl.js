@@ -74,13 +74,11 @@ function employee() {
             else {
                 let fN = mgrN[0];
                 let lN = mgrN[1];
-                console.log("\n 1 NAME MGR: " + fN + " " + lN);
                 tracker.connection.query(
                 "SELECT * FROM employees WHERE ? AND ?", 
                 [{first_name: fN}, {last_name: lN}], 
                 function(err, res) {
                     if (err) throw err;
-                    console.log("\n 2 result id: " + res[0].id);
                     let im = res[0].id;
                     return addE(answers, im, roleOut);
                 });
@@ -90,9 +88,6 @@ function employee() {
 }
 
 function addE(answers, im, roleOut) {
-    console.log("\n 3 answers: " + answers.fName);
-    console.log("\n 4 im " + im);
-    console.log("\n 5 roleOut " + roleOut);
     tracker.connection.query(
     "INSERT INTO employees SET ?", 
         {
@@ -103,11 +98,136 @@ function addE(answers, im, roleOut) {
         }, 
     function(err, res) {
         if (err) throw err;
-        console.log(`\n 5 You've added the following employee: ${answers.fName} ${answers.lName} \n ------------------------------- \n`);
+        console.log(`\n You've added the following employee: ${answers.fName} ${answers.lName} \n ------------------------------- \n`);
     });
     tracker.runStart();
+}
+
+function updateEmpl() {
+    let empCol = [];
+    let empNames = [];
+    tracker.connection.query("SHOW COLUMNS FROM employees", function(err,res) {
+        if (err) throw err;
+        res.forEach(obj => empCol.push(obj.Field));
+        empCol.shift();
+    });
+    tracker.connection.query("SELECT * FROM employees", function(err,res) {
+        if (err) throw err
+        res.forEach(function(obj) {
+        let name = obj.first_name.concat(" ", obj.last_name);
+        empNames.push(name);
+        });
+        updE2(empNames, empCol);
+    });
+}
+
+function updE2(empNames, empCol) {
+    inquirer.prompt([
+        {
+            name: "who",
+            type: "list",
+            message: "Who would you like to update?",
+            choices: empNames
+        },
+        {
+            name: "upWhat",
+            type: "list",
+            message: "What would you like to update?",
+            choices: empCol
+        }
+    ]).then(function(data) {
+        let eName = data.who;
+        let up = data.upWhat;
+        switch (data.upWhat) {
+            case 'first_name':
+                upPrompt = {
+                    name: "update",
+                    type: "input",
+                    message: "What is this employees new first name?"
+                }
+                break;
+            case 'last_name':
+                upPrompt = {
+                    name: "update",
+                    type: "input",
+                    message: "What is this employees new last name?"
+                }
+                break;
+            case 'role_id':
+                upPrompt = {
+                    name: "update",
+                    type: "list",
+                    message: "What is this employees new role?",
+                    choices: roles
+                }
+                break;
+            case 'manager_id':
+                upPrompt = {
+                    name: "update",
+                    type: "list",
+                    message: "Who is this employees new manager?",
+                    choices: mgrs
+                }
+                break;
+        }
+        up3(eName, up, upPrompt);
+    });
+}
+
+function up3(eName, up, upPrompt) {
+    inquirer.prompt(upPrompt).then(function(data) {
+        let upD;
+        switch (up) {
+            case 'first_name':
+                upD = data.update;
+                break;
+            case 'last_name':
+                upD = data.update;
+                break;
+            case 'role_id':
+                tracker.connection.query('SELECT id FROM roles WHERE ?',{
+                    title: data.update
+                } ,
+                function (err,res) {
+                    upD = res[0].id;
+                    up4(upD, up, data, eName)
+                });
+                break;
+            case 'manager_id':
+                let mN = data.update.split(" ");
+                console.log(mN);
+                tracker.connection.query('SELECT id FROM employees WHERE ? AND ?',[
+                    {
+                        first_name: mN[0]
+                    },
+                    {
+                        last_name: mN[1]
+                    }
+                ],
+                function (err,res) {
+                    upD = res[0].id;
+                    up4(upD, up, data, eName)
+                });
+                break;
+        }
+        
+    });
+}
+
+function up4(upD, up, data, eName) {
+    console.log(upD);
+    let p1 = {};
+    p1[up] = upD;
+    let nm = eName.split(" ");
+    console.log(p1);
+    tracker.connection.query(
+    "UPDATE employees SET ? WHERE (? AND ?)",[p1, {first_name: nm[0]}, {last_name: nm[1]}],
+    function(err, res) {
+        console.log(res);
+    }
+    );
 }
 exports.retrMan = retrMan;
 exports.retrRoles = retrRoles;
 exports.employee = employee;
-
+exports.updateEmpl = updateEmpl;

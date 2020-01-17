@@ -49,7 +49,7 @@ function runStart() {
                 chooseCat(catQ);
                 break;
             case "Employees":
-                catQ = ["View employees", "Add employee", "Exit"];
+                catQ = ["View employees", "Add employee", "Update Employee", "Exit"];
                 chooseCat(catQ);
                 break;
             case "Exit":
@@ -95,6 +95,12 @@ function chooseCat(catQ) {
             emplJ.retrMan();
             emplJ.retrRoles();
             emplJ.employee();
+            break;
+
+            case "Update Employee":
+            emplJ.retrMan();
+            emplJ.retrRoles();
+            emplJ.updateEmpl()
             break;
     
             case "Exit":
