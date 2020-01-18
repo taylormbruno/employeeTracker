@@ -57,8 +57,8 @@ function role() {
             function(err, res) {
                 if (err) throw err;
                 console.log(`\nYou've added the following role: ${data.title} \n ------------------------------- \n`);
-            });
             tracker.runStart();
+            });
         });
     });
 }

@@ -49,7 +49,9 @@ function runStart() {
                 chooseCat(catQ);
                 break;
             case "Employees":
-                catQ = ["View employees", "Add employee", "Update Employee", "Exit"];
+                catQ = ["View all employees", "View employees by manager", "Add employee", "Update Employee", "Exit"];
+                emplJ.retrMan();
+                emplJ.retrRoles();
                 chooseCat(catQ);
                 break;
             case "Exit":
@@ -87,19 +89,19 @@ function chooseCat(catQ) {
             roleJ.role();
             break;
     
-            case "View employees":
-            view("employees");
+            case "View all employees":
+            emplJ.viewEmp();
+            break;
+
+            case "View employees by manager":
+            emplJ.viewByMan();
             break;
                     
             case "Add employee":
-            emplJ.retrMan();
-            emplJ.retrRoles();
             emplJ.employee();
             break;
 
             case "Update Employee":
-            emplJ.retrMan();
-            emplJ.retrRoles();
             emplJ.updateEmpl()
             break;
     
@@ -130,7 +132,7 @@ function view(view) {
             });
             break;
         case "employees":
-            query = "SELECT * FROM employees";
+            query = "SELECT e.first_name, e.last_name, e.manager_name, r.title, r.salary, d.dept_name FROM ((employees e INNER JOIN roles r ON e.role_id = r.id) INNER JOIN departments d ON r.department_id = d.id)";
             connection.query(query, function(err,res) {
                 if (err) throw err;
                 console.table(res);
@@ -142,3 +144,4 @@ function view(view) {
 
 exports.runStart = runStart;
 exports.connection = connection;
+exports.view = view;

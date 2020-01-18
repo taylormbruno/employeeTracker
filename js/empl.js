@@ -5,20 +5,21 @@ const inquirer = require("inquirer");
 const tracker = require("../tracker");
 
 let roles = [];
-let mgrs = ["none"];
+let mgrs = [];
 
 // used to retrieve roles to create inquirer lists for employee
 function retrRoles() {
+    roles=[];
     tracker.connection.query("SELECT * FROM roles", function(err, res) {
         if (err) throw err;
         for (let i=0; i<res.length; i++) {
             roles.push(res[i].title);
         }
-        // console.log(roles);
     });
 }
 
 function retrMan() {
+    mgrs = ["none"];
     tracker.connection.query("SELECT * FROM employees WHERE manager_id IS NULL", function(err, res) {
         // console.log(res);
         if(err) throw err;
@@ -27,7 +28,6 @@ function retrMan() {
             let last = res[i].last_name;
             let mName = first.concat(' ', last); 
             mgrs.push(mName);
-            // console.log(mName);
         }
     });
 }
@@ -79,7 +79,6 @@ function employee() {
                 "SELECT * FROM employees WHERE ? AND ?", 
                 [{first_name: fN}, {last_name: lN}], 
                 function(err, res) {
-                    console.log("2 " + res);
                     if (err) throw err;
                     let im = res[0].id;
                     return addE(answers, im, roleOut);
@@ -100,11 +99,9 @@ function addE(answers, im, roleOut) {
         }, 
     function(err, res) {
         if (err) throw err;
-        console.log("3 "+res);
-
         console.log(`\n You've added the following employee: ${answers.fName} ${answers.lName} \n ------------------------------- \n`);
+        tracker.runStart();
     });
-    tracker.runStart();
 }
 
 function updateEmpl() {
@@ -124,7 +121,9 @@ function updateEmpl() {
         updE2(empNames, empCol);
     });
 }
+
 let eName;
+
 function updE2(empNames, empCol) {
     inquirer.prompt([
         {
@@ -149,14 +148,14 @@ function updE2(empNames, empCol) {
                     type: "input",
                     message: "What is this employees new first name?"
                 }
-                break;
+            break;
             case 'last_name':
                 upPrompt = {
                     name: "update",
                     type: "input",
                     message: "What is this employees new last name?"
                 }
-                break;
+            break;
             case 'role_id':
                 upPrompt = {
                     name: "update",
@@ -164,7 +163,7 @@ function updE2(empNames, empCol) {
                     message: "What is this employees new role?",
                     choices: roles
                 }
-                break;
+            break;
             case 'manager_id':
                 upPrompt = {
                     name: "update",
@@ -172,7 +171,7 @@ function updE2(empNames, empCol) {
                     message: "Who is this employees new manager?",
                     choices: mgrs
                 }
-                break;
+            break;
         }
         up3(up, upPrompt);
     });
@@ -184,10 +183,10 @@ function up3(up, upPrompt) {
         switch (up) {
             case 'first_name':
                 upD = data.update;
-                break;
+            break;
             case 'last_name':
                 upD = data.update;
-                break;
+            break;
             case 'role_id':
                 tracker.connection.query('SELECT id FROM roles WHERE ?',{
                     title: data.update
@@ -196,7 +195,7 @@ function up3(up, upPrompt) {
                     upD = res[0].id;
                     up4(upD, up, data, eName)
                 });
-                break;
+            break;
             case 'manager_id':
                 let mN = data.update.split(" ");
                 tracker.connection.query('SELECT id FROM employees WHERE ? AND ?',[
@@ -211,9 +210,8 @@ function up3(up, upPrompt) {
                     upD = res[0].id;
                     up4(upD, up)
                 });
-                break;
-        }
-        
+            break;
+        } 
     });
 }
 
@@ -224,11 +222,92 @@ function up4(upD, up) {
     tracker.connection.query(
     "UPDATE employees SET ? WHERE (? AND ?)",[p1, {first_name: nm[0]}, {last_name: nm[1]}],
     function(err, res) {
-        console.log(`You have now updated ${eName}'s *${up}* to ${upD}`);
-    }
-    );
+        console.log(`\nYou have now updated ${eName}'s *${up}* to ${upD}`);
+        tracker.runStart();
+
+    });
 }
+
+let counter = 1;
+let length = 1;
+// creates table for employees, using inner joins to display role and department information
+let eMan=[];
+function viewEmp() {
+    tracker.connection.query(
+    "SELECT * FROM employees",
+    function(err,res) {
+        if (err) throw err;
+        res.forEach(function(obj) {
+            if (err) {
+            }
+            else {
+                if (obj.manager_id === null) {
+                }
+                else {
+                    tracker.connection.query(
+                    "SELECT first_name, last_name FROM employees WHERE ?", 
+                    {
+                        id: obj.manager_id
+                    },
+                    function(err, result) {
+                        if (err) throw err;
+                        eMan = (result[0].first_name.concat(" ", result[0].last_name));
+                        tracker.connection.query(
+                        "UPDATE employees SET ? WHERE ?",
+                        [
+                            {
+                                manager_name: eMan
+                            },
+                            {
+                                id: obj.id
+                            }
+                        ],
+                        function(e, r) {
+                            if (e) throw r;
+                            viewE2();
+                        });
+                    });
+                }
+            }
+        });
+    });
+}
+
+function viewE2() {
+    counter++;
+    if (counter === (length+1)) {
+        tracker.view("employees");
+    }
+}
+
+function viewByMan() {
+    inquirer.prompt(
+        {
+            name: "viewMan",
+            type: "list",
+            message: "Which manager's employees would you like to see?",
+            choices: mgrs
+        }
+    ).then(function(data) {
+        tracker.connection.query(
+            "SELECT e.first_name, e.last_name, e.manager_name, r.title, r.salary, d.dept_name FROM ((employees e INNER JOIN roles r ON e.role_id = r.id) INNER JOIN departments d ON r.department_id = d.id) WHERE ?",
+            {
+                manager_name: data.viewMan
+            },
+            function(err, res) {
+                console.log(`\n${data.viewMan}'s Employees`);
+                if (err) throw err;
+                console.table(res);
+                tracker.runStart();
+            }
+        )
+    });
+}
+
 exports.retrMan = retrMan;
 exports.retrRoles = retrRoles;
 exports.employee = employee;
 exports.updateEmpl = updateEmpl;
+exports.viewEmp = viewEmp;
+exports.viewE2 = viewE2;
+exports.viewByMan = viewByMan;
