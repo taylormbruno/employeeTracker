@@ -63,5 +63,24 @@ function role() {
     });
 }
 
+function updateRoles(new_id, old_id, oldD, newD) {
+    console.log(new_id);
+    console.log(old_id);
+    tracker.connection.query(
+        "UPDATE roles SET ? WHERE ?",
+        [
+            {
+                department_id: new_id
+            },
+            {
+                department_id: old_id
+            }
+        ],
+        function(err,res){
+            if (err) throw err;
+            console.log(`\nYou've moved the ${oldD}'s roles to the department: ${newD} \n ------------------------------- \n`);
+        });
+}
 exports.retrDepts = retrDepts;
 exports.role = role;
+exports.updateRoles = updateRoles;

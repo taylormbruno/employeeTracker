@@ -41,15 +41,18 @@ function runStart() {
         let catQ = [];
         switch (data.category) {
             case "Departments":
-                catQ = ["View departments", "Add department"];
+                catQ = ["View departments", "Add a department", "Delete a department"];
+                deptJ.retrDepts();
                 chooseCat(catQ);
                 break;
             case "Roles":
-                catQ = ["View roles", "Add role", "Exit"];
+                catQ = ["View roles", "Add a role", "Delete a role", "Exit"];
+                roleJ.retrDepts();
+
                 chooseCat(catQ);
                 break;
             case "Employees":
-                catQ = ["View all employees", "View employees by manager", "Add employee", "Update Employee", "Exit"];
+                catQ = ["View all employees", "View employees by manager", "Add an employee", "Update an employee", "Delete an employee", "Exit"];
                 emplJ.retrMan();
                 emplJ.retrRoles();
                 chooseCat(catQ);
@@ -76,17 +79,23 @@ function chooseCat(catQ) {
             view("departments");
             break;
     
-            case "Add department": 
+            case "Add a department": 
             deptJ.department();
+            break;
+
+            case "Delete a department":
+            deptJ.delDept();
             break;
     
             case "View roles":
             view("roles");
             break;
                 
-            case "Add role":
-            roleJ.retrDepts();
+            case "Add a role":
             roleJ.role();
+            break;
+
+            case "Delete a role":
             break;
     
             case "View all employees":
@@ -97,12 +106,15 @@ function chooseCat(catQ) {
             emplJ.viewByMan();
             break;
                     
-            case "Add employee":
+            case "Add an employee":
             emplJ.employee();
             break;
 
-            case "Update Employee":
+            case "Update an employee":
             emplJ.updateEmpl()
+            break;
+
+            case "Delete an employee":
             break;
     
             case "Exit":
@@ -119,6 +131,7 @@ function view(view) {
             query = "SELECT * FROM departments";
             connection.query(query, function(err,res) {
                 if (err) throw err;
+                console.log(`\n Your Departments`);
                 console.table(res);
                 runStart();
             });
@@ -127,6 +140,7 @@ function view(view) {
             query = "SELECT * FROM roles";
             connection.query(query, function(err,res) {
                 if (err) throw err;
+                console.log(`\n Your Roles`)
                 console.table(res);
                 runStart();
             });

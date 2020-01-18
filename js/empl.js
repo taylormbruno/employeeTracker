@@ -222,9 +222,8 @@ function up4(upD, up) {
     tracker.connection.query(
     "UPDATE employees SET ? WHERE (? AND ?)",[p1, {first_name: nm[0]}, {last_name: nm[1]}],
     function(err, res) {
-        console.log(`\nYou have now updated ${eName}'s *${up}* to ${upD}`);
+        console.log(`\nYou have now updated ${eName}'s *${up}* to ${upD}\n ------------------------------- \n`);
         tracker.runStart();
-
     });
 }
 
