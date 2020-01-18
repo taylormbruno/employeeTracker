@@ -31,6 +31,22 @@ function retrMan() {
         }
     });
 }
+let emp = [];
+function retrEmp() {
+    emp = [];
+    tracker.connection.query(
+    "SELECT * FROM employees",
+    function(err, res) {
+        if (err) throw err;
+        res.forEach(
+            function(obj) {
+                let e = obj.first_name.concat(" ", obj.last_name);
+                emp.push(e);
+            }
+        );
+    });
+
+}
 
 // create employee
 function employee() {
@@ -183,9 +199,11 @@ function up3(up, upPrompt) {
         switch (up) {
             case 'first_name':
                 upD = data.update;
+                up4(upD, up);
             break;
             case 'last_name':
                 upD = data.update;
+                up4(upD, up);
             break;
             case 'role_id':
                 tracker.connection.query('SELECT id FROM roles WHERE ?',{
@@ -303,10 +321,40 @@ function viewByMan() {
     });
 }
 
+function delEmp() {
+    inquirer.prompt({
+        name:"del",
+        type:"list",
+        message:"Which employee would you like to delete?",
+        choices: emp
+    }).then(function(data) {
+        const del = (data.del).split(" ");
+        console.log(del);
+        let f = del[0];
+        let l = del[1];
+        tracker.connection.query(
+        "DELETE FROM employees WHERE ? AND ?",
+        [
+            {
+                first_name: f
+            },{
+                last_name: l
+            }
+        ],
+        function(err, res) {
+            console.log(res);
+
+        });
+        tracker.runStart();
+    });
+}
+
 exports.retrMan = retrMan;
 exports.retrRoles = retrRoles;
+exports.retrEmp = retrEmp;
 exports.employee = employee;
 exports.updateEmpl = updateEmpl;
 exports.viewEmp = viewEmp;
 exports.viewE2 = viewE2;
 exports.viewByMan = viewByMan;
+exports.delEmp = delEmp;

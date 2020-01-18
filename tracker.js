@@ -55,6 +55,7 @@ function runStart() {
                 catQ = ["View all employees", "View employees by manager", "Add an employee", "Update an employee", "Delete an employee", "Exit"];
                 emplJ.retrMan();
                 emplJ.retrRoles();
+                emplJ.retrEmp();
                 chooseCat(catQ);
                 break;
             case "Exit":
@@ -115,6 +116,7 @@ function chooseCat(catQ) {
             break;
 
             case "Delete an employee":
+            emplJ.delEmp();
             break;
     
             case "Exit":
