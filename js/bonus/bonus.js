@@ -129,3 +129,58 @@ function viewByMan() {
 // exports.alterMnCol = alterMnCol;
 // exports.updateMnCol = updateMnCol;
 // exports.dropMnCol = dropMnCol;
+
+
+// update emloyees manager id to manager name; may need to finish completeing bonus
+let counter = 1;
+let length = 1;
+// creates table for employees, using inner joins to display role and department information
+let eMan =[];
+
+function viewEmp() {
+    tracker.connection.query(
+    "SELECT * FROM employees",
+    function(err,res) {
+        if (err) throw err;
+        res.forEach(function(obj) {
+            if (err) {
+                console.log(err);
+            }
+            else {
+                if (obj.manager_id === null) {
+                }
+                else {
+                    tracker.connection.query(
+                    "SELECT first_name, last_name FROM employees WHERE ?", 
+                    {
+                        id: obj.manager_id
+                    },
+                    function(error, result) {
+                        // if (error) throw error;
+                        eMan = (result[0].first_name.concat(" ", result[0].last_name));
+                        tracker.connection.query(
+                        "UPDATE employees SET ? WHERE ?",
+                        [
+                            {
+                                manager_name: eMan
+                            },
+                            {
+                                id: obj.id
+                            }
+                        ],
+                        function(e, r) {
+                            // if (e) throw r;
+                            viewE2();
+                        });
+                    });
+                }
+            }
+        });
+    });
+}
+function viewE2() {
+    counter++;
+    if (counter === (length+1)) {
+        tracker.view("employees");
+    }
+}

@@ -1,6 +1,8 @@
 
 const inquirer = require("inquirer");
 const tracker = require("../tracker");
+const cTable = require("console.table");
+
 
 let roles = [];
 let mgrs = [];
@@ -112,9 +114,9 @@ function updateEmpl() {
         let e = empCol.indexOf("manager_id");
         empCol.splice(e,1);
         let f = empCol.indexOf("manager_name");
-        console.log(e);
-        console.log(f);
-        console.log(empCol);
+        // console.log(e);
+        // console.log(f);
+        // console.log(empCol);
         empCol.splice(f,1);
         empCol.splice(0,1);
     });
@@ -173,11 +175,11 @@ function updE2(empNames, empCol) {
             break;
             
         }
-        up3(eName, up, upPrompt);
+        up3(up, upPrompt);
     });
 }
 
-function up3(eName, up, upPrompt) { 
+function up3(up, upPrompt) { 
     inquirer.prompt(upPrompt).then(function(data) {
         let upD;
         switch (up) {
@@ -213,59 +215,8 @@ function up4(upD, up) {
     });
 }
 
-// let counter = 1;
-// let length = 1;
-// // creates table for employees, using inner joins to display role and department information
-// let eMan =[];
 
-// function viewEmp() {
-//     tracker.connection.query(
-//     "SELECT * FROM employees",
-//     function(err,res) {
-//         if (err) throw err;
-//         res.forEach(function(obj) {
-//             if (err) {
-//                 console.log(err);
-//             }
-//             else {
-//                 if (obj.manager_id === null) {
-//                 }
-//                 else {
-//                     tracker.connection.query(
-//                     "SELECT first_name, last_name FROM employees WHERE ?", 
-//                     {
-//                         id: obj.manager_id
-//                     },
-//                     function(error, result) {
-//                         // if (error) throw error;
-//                         eMan = (result[0].first_name.concat(" ", result[0].last_name));
-//                         tracker.connection.query(
-//                         "UPDATE employees SET ? WHERE ?",
-//                         [
-//                             {
-//                                 manager_name: eMan
-//                             },
-//                             {
-//                                 id: obj.id
-//                             }
-//                         ],
-//                         function(e, r) {
-//                             // if (e) throw r;
-//                             viewE2();
-//                         });
-//                     });
-//                 }
-//             }
-//         });
-//     });
-// }
-// function viewE2() {
-//     counter++;
-//     if (counter === (length+1)) {
-//         tracker.view("employees");
-//     }
-// }
-
+// only showing one employee when using inner join and displaying specific columns. else shows all columns but all employees under that manager 
 function viewByMan() {
     inquirer.prompt(
         {
@@ -276,7 +227,7 @@ function viewByMan() {
         }
     ).then(function(data) {
         tracker.connection.query(
-            "SELECT e.first_name, e.last_name, e.manager_name, r.title, r.salary, d.dept_name FROM ((employees e INNER JOIN roles r ON e.role_id = r.id) INNER JOIN departments d ON r.department_id = d.id) WHERE ?",
+            "SELECT * FROM ((employees e INNER JOIN roles r ON e.role_id = r.id) INNER JOIN departments d ON r.department_id = d.id) WHERE ?",
             {
                 manager_name: data.viewMan
             },
@@ -289,6 +240,8 @@ function viewByMan() {
         )
     });
 }
+// query used to filter which columns to show
+// "SELECT e.first_name, e.last_name, e.manager_name, r.title, r.salary, d.dept_name FROM ((employees e INNER JOIN roles r ON e.role_id = r.id) INNER JOIN departments d ON r.department_id = d.id) WHERE ?"
 
 exports.retrMan = retrMan;
 exports.retrRoles = retrRoles;

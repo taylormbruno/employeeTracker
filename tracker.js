@@ -93,7 +93,7 @@ function chooseCat(catQ) {
             view("employees");
             break;
 
-            // bonus did not get working
+            // bonus did not get working 
             case "View employees by manager":
             emplJ.viewByMan();
             break;
@@ -126,7 +126,7 @@ function view(view) {
             });
             break;
         case "roles":
-            query = "SELECT * FROM roles";
+            query = "SELECT title, salary, dept_name FROM roles INNER JOIN departments ON roles.department_id = departments.id";
             connection.query(query, function(err,res) {
                 if (err) throw err;
                 console.table(res);
