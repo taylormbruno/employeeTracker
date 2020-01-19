@@ -1,7 +1,7 @@
 # Employee Tracker
 
 ## About
-This Content Management System makes it easy for non-developers to view and interact with employee information stored in databases. The interface allows departments, roles, and employees to be added, viewed, and updated based off user input.
+This Content Management System makes it easy for non-developers to view and interact with employee information stored in databases. The interface allows departments, roles, and employees to be added and viewed all from the command line. Employees can be updated by Name and Role, and can be viewed by manager.
 
 ## Getting Started
 * Run `npm install` to make sure the following are installed:
