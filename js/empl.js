@@ -1,7 +1,5 @@
 
-const mysql = require("mysql");
 const inquirer = require("inquirer");
-
 const tracker = require("../tracker");
 
 let roles = [];
@@ -182,10 +180,9 @@ function up3(up, upPrompt) {
         let upD;
         switch (up) {
             case 'first_name':
-                upD = data.update;
-            break;
             case 'last_name':
                 upD = data.update;
+                up4(upD, up);
             break;
             case 'role_id':
                 tracker.connection.query('SELECT id FROM roles WHERE ?',{
@@ -232,6 +229,7 @@ let counter = 1;
 let length = 1;
 // creates table for employees, using inner joins to display role and department information
 let eMan=[];
+
 function viewEmp() {
     tracker.connection.query(
     "SELECT * FROM employees",
@@ -249,8 +247,8 @@ function viewEmp() {
                     {
                         id: obj.manager_id
                     },
-                    function(err, result) {
-                        if (err) throw err;
+                    function(error, result) {
+                        if (error) throw error;
                         eMan = (result[0].first_name.concat(" ", result[0].last_name));
                         tracker.connection.query(
                         "UPDATE employees SET ? WHERE ?",
@@ -272,7 +270,6 @@ function viewEmp() {
         });
     });
 }
-
 function viewE2() {
     counter++;
     if (counter === (length+1)) {

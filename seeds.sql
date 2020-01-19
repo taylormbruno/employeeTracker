@@ -32,3 +32,6 @@ WHERE title = "Sales Lead";
 SELECT * FROM employees WHERE manager_id IS NOT NULL;
 
 SELECT id FROM employees WHERE first_name = "Tom" AND last_name = "Cruise";
+
+ALTER TABLE employees ADD manager_name VARCHAR(150); 
+ALTER TABLE employees DROP COLUMN manager_name;

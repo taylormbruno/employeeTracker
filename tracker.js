@@ -90,9 +90,10 @@ function chooseCat(catQ) {
             break;
     
             case "View all employees":
-            emplJ.viewEmp();
+            view("employees");
             break;
 
+            // bonus did not get working
             case "View employees by manager":
             emplJ.viewByMan();
             break;
@@ -101,6 +102,7 @@ function chooseCat(catQ) {
             emplJ.employee();
             break;
 
+            // can update any col in the employee table
             case "Update Employee":
             emplJ.updateEmpl()
             break;
