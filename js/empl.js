@@ -108,10 +108,18 @@ function updateEmpl() {
     tracker.connection.query("SHOW COLUMNS FROM employees", function(err,res) {
         if (err) throw err;
         res.forEach(obj => empCol.push(obj.Field));
-        empCol.shift();
+        // remove 114 and 118 to allow update to manager
+        let e = empCol.indexOf("manager_id");
+        empCol.splice(e,1);
+        let f = empCol.indexOf("manager_name");
+        console.log(e);
+        console.log(f);
+        console.log(empCol);
+        empCol.splice(f,1);
+        empCol.splice(0,1);
     });
     tracker.connection.query("SELECT * FROM employees", function(err,res) {
-        if (err) throw err
+        if (err) throw err;
         res.forEach(function(obj) {
         let name = obj.first_name.concat(" ", obj.last_name);
         empNames.push(name);
@@ -137,6 +145,7 @@ function updE2(empNames, empCol) {
             choices: empCol
         }
     ]).then(function(data) {
+        let upPrompt;
         eName = data.who;
         let up = data.upWhat;
         switch (data.upWhat) {
@@ -162,20 +171,13 @@ function updE2(empNames, empCol) {
                     choices: roles
                 }
             break;
-            case 'manager_id':
-                upPrompt = {
-                    name: "update",
-                    type: "list",
-                    message: "Who is this employees new manager?",
-                    choices: mgrs
-                }
-            break;
+            
         }
-        up3(up, upPrompt);
+        up3(eName, up, upPrompt);
     });
 }
 
-function up3(up, upPrompt) {
+function up3(eName, up, upPrompt) { 
     inquirer.prompt(upPrompt).then(function(data) {
         let upD;
         switch (up) {
@@ -189,30 +191,17 @@ function up3(up, upPrompt) {
                     title: data.update
                 } ,
                 function (err,res) {
+                    if (err) throw err;
                     upD = res[0].id;
-                    up4(upD, up, data, eName)
+                    up4(upD, up, data);
                 });
             break;
-            case 'manager_id':
-                let mN = data.update.split(" ");
-                tracker.connection.query('SELECT id FROM employees WHERE ? AND ?',[
-                    {
-                        first_name: mN[0]
-                    },
-                    {
-                        last_name: mN[1]
-                    }
-                ],
-                function (err,res) {
-                    upD = res[0].id;
-                    up4(upD, up)
-                });
-            break;
+            
         } 
     });
 }
 
-function up4(upD, up) {
+function up4(upD, up) { 
     let p1 = {};
     p1[up] = upD;
     let nm = eName.split(" ");
@@ -221,61 +210,61 @@ function up4(upD, up) {
     function(err, res) {
         console.log(`\nYou have now updated ${eName}'s *${up}* to ${upD}`);
         tracker.runStart();
-
     });
 }
 
-let counter = 1;
-let length = 1;
-// creates table for employees, using inner joins to display role and department information
-let eMan=[];
+// let counter = 1;
+// let length = 1;
+// // creates table for employees, using inner joins to display role and department information
+// let eMan =[];
 
-function viewEmp() {
-    tracker.connection.query(
-    "SELECT * FROM employees",
-    function(err,res) {
-        if (err) throw err;
-        res.forEach(function(obj) {
-            if (err) {
-            }
-            else {
-                if (obj.manager_id === null) {
-                }
-                else {
-                    tracker.connection.query(
-                    "SELECT first_name, last_name FROM employees WHERE ?", 
-                    {
-                        id: obj.manager_id
-                    },
-                    function(error, result) {
-                        if (error) throw error;
-                        eMan = (result[0].first_name.concat(" ", result[0].last_name));
-                        tracker.connection.query(
-                        "UPDATE employees SET ? WHERE ?",
-                        [
-                            {
-                                manager_name: eMan
-                            },
-                            {
-                                id: obj.id
-                            }
-                        ],
-                        function(e, r) {
-                            if (e) throw r;
-                            viewE2();
-                        });
-                    });
-                }
-            }
-        });
-    });
-}
-function viewE2() {
-    counter++;
-    if (counter === (length+1)) {
-        tracker.view("employees");
-    }
-}
+// function viewEmp() {
+//     tracker.connection.query(
+//     "SELECT * FROM employees",
+//     function(err,res) {
+//         if (err) throw err;
+//         res.forEach(function(obj) {
+//             if (err) {
+//                 console.log(err);
+//             }
+//             else {
+//                 if (obj.manager_id === null) {
+//                 }
+//                 else {
+//                     tracker.connection.query(
+//                     "SELECT first_name, last_name FROM employees WHERE ?", 
+//                     {
+//                         id: obj.manager_id
+//                     },
+//                     function(error, result) {
+//                         // if (error) throw error;
+//                         eMan = (result[0].first_name.concat(" ", result[0].last_name));
+//                         tracker.connection.query(
+//                         "UPDATE employees SET ? WHERE ?",
+//                         [
+//                             {
+//                                 manager_name: eMan
+//                             },
+//                             {
+//                                 id: obj.id
+//                             }
+//                         ],
+//                         function(e, r) {
+//                             // if (e) throw r;
+//                             viewE2();
+//                         });
+//                     });
+//                 }
+//             }
+//         });
+//     });
+// }
+// function viewE2() {
+//     counter++;
+//     if (counter === (length+1)) {
+//         tracker.view("employees");
+//     }
+// }
 
 function viewByMan() {
     inquirer.prompt(
@@ -305,6 +294,6 @@ exports.retrMan = retrMan;
 exports.retrRoles = retrRoles;
 exports.employee = employee;
 exports.updateEmpl = updateEmpl;
-exports.viewEmp = viewEmp;
-exports.viewE2 = viewE2;
+// exports.viewEmp = viewEmp;
+// exports.viewE2 = viewE2;
 exports.viewByMan = viewByMan;

@@ -1,5 +1,36 @@
 // these functions are not working and are not linked to the actual tracker.
 
+// empl.js > updateEmpl() w/ manager update
+
+
+// inside switch statement empl.js > function up2()
+case 'manager_id':
+                upPrompt = {
+                    name: "update",
+                    type: "list",
+                    message: "Who is this employees new manager?",
+                    choices: mgrs
+                }
+            break;
+// inside switch statement empl.js > function up3()
+case 'manager_name':
+                let mN = data.update.split(" ");
+                tracker.connection.query('SELECT id FROM employees WHERE ? AND ?',[
+                    {
+                        first_name: mN[0]
+                    },
+                    {
+                        last_name: mN[1]
+                    }
+                ],
+                function (err,res) {
+                    // if (err) throw err;
+                    upD = res[0].id;
+                    up4(upD, up, eName); //passed upD up data eName
+                });
+            break;
+
+
 function alterMnCol() {
     console.log("Alter manager name column");
     tracker.connection.query("ALTER TABLE employees ADD manager_name VARCHAR(150)", function(err,res) {
